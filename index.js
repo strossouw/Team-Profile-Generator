@@ -3,6 +3,8 @@ const fs = require("fs");
 const Engineer = require("./lib/Engineer");
 const Manager = require("./lib/Manager");
 const Intern = require("./lib/Intern");
+const teamArray = [];
+
 
 function toEmployeeClass(data) {
   const { name, id, email, github, school, officeNumber } = data;
@@ -47,29 +49,6 @@ function createCard(employee) {
 </div>`;
 }
 
-function createTemplate(data) {
-  const cards = [];
-
-  for (const d of data) {
-    const card = createCard(d);
-    cards.push(card);
-  }
-
-  return `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="stylesheet" href="../assets/css/style.css" />
-      <title>Team Profile Generator</title>
-    </head>
-
-    <h1> My Team </h1>
-
-    <body>${cards}</body>
-  </html>`;
-}
 
 const questions = [
   {
@@ -113,14 +92,52 @@ const questions = [
   },
 ];
 
-inquirer
-  .prompt(questions)
+function generateHeader(){
+
+  return `<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Team Profile Generator</title>
+    </head>
+    <body>`;
+  
+  }
+  
+  function generateFooter(){
+   return `</body> </html>`
+  
+  }
+
+function menu (){
+  inquirer.prompt(questions)
   .then((data) => {
-    fs.writeFileSync(
-      `./output/index.html`,
-      createTemplate([toEmployeeClass(data)])
-    );
+  teamArray.push( createCard([toEmployeeClass(data)]))}
+  
+  )
+  .then (CreateTeam);
+};
+
+function CreateTeam(){
+  inquirer.prompt ([{
+      type: "confirm",
+      name: "continue",
+      message: "Do you want to add more team members?",
+  }])
+
+  .then(data => {
+      if (data.continue){
+          menu()
+      }
+      else{
+      console.log(teamArray);
+      fs.writeFileSync(
+          `./output/index.html`,
+          createTemplate(generateHeader,[toEmployeeClass(teamArray)],generateFooter)
+       )}
   })
-  .catch((err) => {
-    console.log(err);
-  });
+}
+
+  menu();
